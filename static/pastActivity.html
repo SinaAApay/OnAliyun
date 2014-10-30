@@ -29,7 +29,7 @@ $def with(activitysIN,activitysORG)
       <div class="col-md-6 column">
         <ul>
 	
-               $for ac in activitysIN:
+               $for ac in activitysIN[::-1]:
                     <li>
                     <div class="panel-group" id="panel-153902">
                     <div class="panel panel-default">
@@ -57,7 +57,7 @@ $def with(activitysIN,activitysORG)
       </div>
       <div class="col-md-6 column"> 
         <ul>
-            $for ac in activitysORG:
+            $for ac in activitysORG[::-1]:
                 <li>
                 <div class="panel-group" id="panel-72507">
                 <div class="panel panel-default">

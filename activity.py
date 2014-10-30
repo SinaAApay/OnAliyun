@@ -1,10 +1,11 @@
+# -*- coding:utf-8 -*-
 import os,sys
 path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(path)
 import web
 import pymongo
 import code
-
+from getclient import getClient
 render=web.template.render('/var/www/AA/static')
 con=pymongo.Connection('localhost',27017)
 db=con.aapay
@@ -15,6 +16,9 @@ class currentActivity:
     def GET(self):
 #	return "hello"
         cookie=web.cookies()
+	ac=cookie[u'access_token']
+	exp=cookie[u'expires_in']
+	client=getClient(ac,exp)
         activityIn=[]
         activityORG=[]
         uid=int(cookie[u'uid'])
@@ -24,12 +28,14 @@ class currentActivity:
                 a_activity=activities.find_one({u'weibo_id':ac})
                 if a_activity[u'ifend']==False and a_activity[u'ifclose']==False:
                     activityORG.append(a_activity)
-        name=cookie[u'screen_name']
+        #name=cookie[u'screen_name']
+	infor=client.users.show.get(uid=int(cookie[u'uid']))
+	name=infor[u'screen_name']
+	
         for ac in activities.find():
             if name in ac[u'peopleInvited']:
                 if ac[u'ifend']==False and ac[u'ifclose']==False and (ac in  activityORG)==False:
                     activityIn.append(ac)
-
         return render.currentActivity(activityIn,activityORG)
 
 
@@ -45,7 +51,13 @@ class pastActivity:
                 a_activity=activities.find_one({u'weibo_id':ac})
                 if a_activity[u'ifend']==True:
                     activityORG.append(a_activity)
-        name=cookie[u'screen_name']
+        #name=cookie[u'screen_name']
+	ac=cookie[u'access_token']
+	exp=cookie[u'expires_in']
+	client=getClient(ac,exp)
+	infor=client.users.show.get(uid=int(cookie[u'uid']))
+	name=infor[u'screen_name']
+
         for ac in activities.find():
             if name in ac[u'peopleIn']:
                 if ac[u'ifend']==True:
@@ -85,11 +97,17 @@ class endActivity:
 
 class attendActivity:
     def POST(self):
+        cookie=web.cookies()
         webinput=web.input()
         weibo_id=webinput[u'weibo_id']
         ac=activities.find_one({u'weibo_id':weibo_id})
-        cookies=web.cookies()
-        name=cookies[u'screen_name']
+        #name=cookies[u'screen_name']
+	acc=cookie[u'access_token']
+	exp=cookie[u'expires_in']
+	client=getClient(acc,exp)
+	infor=client.users.show.get(uid=int(cookie[u'uid']))
+	name=infor[u'screen_name']
+
         if name in ac[u'peopleIn']:
             web.seeother("/currentActivity")
         else:
